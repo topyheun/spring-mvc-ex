@@ -1,0 +1,24 @@
+package com.doubles.ex01.commons;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.ModelAndView;
+
+@ControllerAdvice
+public class CommonExceptionAdvice {
+
+    private static final Logger logger = LoggerFactory.getLogger(ControllerAdvice.class);
+
+    @ExceptionHandler(Exception.class)
+    public ModelAndView commonException(Exception e) {
+        logger.info("commonException() : called....");
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.addObject("exception", e);
+        logger.info(e.toString());
+        modelAndView.setViewName("/commons/error_common");
+        return modelAndView;
+    }
+
+}

@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.doubles.ex02.mapper.BoardMapper">
+
+    <!--게시글 입력-->
+    <insert id="create">
+        INSERT INTO tbl_board (
+        title
+        , content
+        , writer
+        ) VALUES (
+        #{title}
+        , #{content}
+        , #{writer}
+        )
+    </insert>
+
+    <!--게시글 조회-->
+    <select id="read" resultType="BoardVO">
+        SELECT
+        bno
+        , title
+        , content
+        , writer
+        , regdate
+        , viewcnt
+        FROM tbl_board
+        WHERE bno = #{bno}
+    </select>
+
+    <!--게시글 수정-->
+    <update id="update">
+        UPDATE tbl_board
+        SET title = #{title}, content = #{content}
+        WHERE bno = #{bno}
+    </update>
+
+    <!--게시글 삭제-->
+    <delete id="delete">
+        DELETE FROM tbl_board
+        WHERE bno = #{bno}
+    </delete>
+
+    <!--게시글 전체 목록-->
+    <select id="list" resultType="BoardVO">
+        <![CDATA[
+        SELECT
+            bno
+            , title
+            , content
+            , writer
+            , regdate
+            , viewcnt
+        FROM tbl_board
+        WHERE bno > 0
+        ORDER BY bno DESC, regdate DESC
+        ]]>
+    </select>
+
+    <!--게시글 전체 목록 2 - 페이지당 게시물의 갯수 10으로 고정, 파라미터 : 페이지의 첫번째 게시물 번호-->
+    <select id="listPaging" resultType="BoardVO">
+        <![CDATA[
+        SELECT
+            bno
+            , title
+            , content
+            , writer
+            , regdate
+            , viewcnt
+        FROM tbl_board
+        WHERE bno > 0
+        ORDER BY bno DESC, regdate DESC
+        LIMIT #{pageStart}, 10
+        ]]>
+    </select>
+
+    <!--게시글 전체 목록 3 - 파라미터 : 페이지의 첫번째 게시물번호, 페이지당 게시물의 갯수-->
+    <select id="listCriteria" resultType="BoardVO">
+        <![CDATA[
+        SELECT
+            bno
+            , title
+            , content
+            , writer
+            , regdate
+            , viewcnt
+        FROM tbl_board
+        WHERE bno > 0
+        ORDER BY bno DESC, regdate DESC
+        LIMIT #{pageStart}, #{perPageNum}
+        ]]>
+    </select>
+
+    <!--전체 게시글의 갯수-->
+    <select id="listCount" resultType="int">
+        <![CDATA[
+        SELECT COUNT(bno)
+        FROM tbl_board
+        WHERE bno > 0
+        ]]>
+    </select>
+
+    <!--게시글 전체 목록 4 페이징 + 검색옵션, 키워드-->
+    <select id="listPagingSearch" resultType="BoardVO">
+        <![CDATA[
+        SELECT
+            bno
+            , title
+            , content
+            , writer
+            , regdate
+            , viewcnt
+        FROM tbl_board
+        WHERE bno > 0
+        ]]>
+        <include refid="search"/>
+        <![CDATA[
+        ORDER BY bno DESC, regdate DESC
+        LIMIT #{pageStart}, #{perPageNum}
+        ]]>
+    </select>
+
+    <!--전체 게시글의 갯수 2 : 검색옵션, 키워드-->
+    <select id="listSearchCount" resultType="int">
+        <![CDATA[
+        SELECT COUNT(bno)
+        FROM tbl_board
+        WHERE bno > 0
+        ]]>
+        <include refid="search"/>
+    </select>
+
+    <!--검색옵션 SQL-->
+    <sql id="search">
+        <if test="searchType != null">
+            <if test="searchType == 't'.toString()">
+                AND title LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="searchType == 'c'.toString()">
+                AND content LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="searchType == 'w'.toString()">
+                AND writer LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="searchType == 'tc'.toString()">
+                AND (
+                title LIKE CONCAT('%', #{keyword}, '%')
+                OR content LIKE CONCAT('%', #{keyword}, '%')
+                )
+            </if>
+            <if test="searchType == 'cw'.toString()">
+                AND (
+                content LIKE CONCAT('%', #{keyword}, '%')
+                OR writer LIKE CONCAT('%', #{keyword}, '%')
+                )
+            </if>
+            <if test="searchType == 'tcw'.toString()">
+                AND (
+                title LIKE CONCAT('%', #{keyword}, '%')
+                OR content LIKE CONCAT('%', #{keyword}, '%')
+                OR writer LIKE CONCAT('%', #{keyword}, '%')
+                )
+            </if>
+        </if>
+    </sql>
+
+</mapper>

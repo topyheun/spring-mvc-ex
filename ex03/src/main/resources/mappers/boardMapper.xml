@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.doubles.ex03.mapper.BoardMapper">
+
+    <!--입력-->
+    <insert id="create">
+        INSERT INTO tbl_board (
+            title
+            , content
+            , writer
+        ) VALUES (
+            #{title}
+            , #{content}
+            , #{writer}
+        )
+    </insert>
+
+    <!--조회-->
+    <select id="read" resultType="BoardVO">
+        SELECT *
+        FROM tbl_board
+        WHERE bno = #{bno}
+    </select>
+
+    <!--수정-->
+    <update id="update">
+        UPDATE tbl_board
+        SET
+            title     = #{title}
+            , content = #{content}
+        WHERE bno = #{bno}
+    </update>
+
+    <!--삭제-->
+    <delete id="delete">
+        DELETE FROM tbl_board
+        WHERE bno = #{bno}
+    </delete>
+
+    <!--목록-->
+    <select id="list" resultType="BoardVO">
+        <![CDATA[
+        SELECT
+            bno
+            , title
+            , content
+            , writer
+            , regdate
+            , viewcnt
+            , replycnt
+        FROM tbl_board
+        WHERE bno > 0
+        ORDER BY bno DESC, regdate DESC
+        ]]>
+    </select>
+
+    <!--목록 페이징-->
+    <select id="listPaging" resultType="BoardVO">
+        <![CDATA[
+        SELECT
+            bno
+            , title
+            , content
+            , writer
+            , regdate
+            , viewcnt
+            , replycnt
+        FROM tbl_board
+        WHERE bno > 0
+        ]]>
+        <include refid="search"/>
+        <![CDATA[
+        ORDER BY bno DESC, regdate DESC
+        LIMIT #{pageStart}, #{perPageNum}
+        ]]>
+    </select>
+
+    <!--게시글 전체숫자 or 검색된 게시글의 숫자-->
+    <select id="listCount" resultType="int">
+        <![CDATA[
+        SELECT COUNT(bno)
+        FROM tbl_board
+        WHERE bno > 0
+        ]]>
+        <include refid="search"/>
+    </select>
+
+    <!--특정 게시글의 댓글수 갱신-->
+    <update id="updateReplyCnt">
+        UPDATE tbl_board
+        SET replycnt = replycnt + #{amount}
+        WHERE bno = #{bno}
+    </update>
+
+    <update id="updateViewCnt">
+        UPDATE tbl_board
+        SET viewcnt = viewcnt + 1
+        WHERE bno = #{bno}
+    </update>
+
+    <!--검색옵션 SQL-->
+    <sql id="search">
+        <if test="searchType != null">
+            <if test="searchType == 't'.toString()">
+                AND title LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="searchType == 'c'.toString()">
+                AND content LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="searchType == 'w'.toString()">
+                AND writer LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="searchType == 'tc'.toString()">
+                AND (
+                title LIKE CONCAT('%', #{keyword}, '%')
+                OR content LIKE CONCAT('%', #{keyword}, '%')
+                )
+            </if>
+            <if test="searchType == 'cw'.toString()">
+                AND (
+                content LIKE CONCAT('%', #{keyword}, '%')
+                OR writer LIKE CONCAT('%', #{keyword}, '%')
+                )
+            </if>
+            <if test="searchType == 'tcw'.toString()">
+                AND (
+                title LIKE CONCAT('%', #{keyword}, '%')
+                OR content LIKE CONCAT('%', #{keyword}, '%')
+                OR writer LIKE CONCAT('%', #{keyword}, '%')
+                )
+            </if>
+        </if>
+    </sql>
+</mapper>
